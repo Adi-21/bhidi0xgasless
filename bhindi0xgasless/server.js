@@ -289,29 +289,126 @@ const TOOLS_SCHEMA = [
 ];
 
 // 🔧 Enhanced configuration extractor with comprehensive header support
+// function extractConfig(req) {
+//     const config = {
+//         apiKey: req.headers['x-api-key'] || req.headers['x_api_key'] || req.headers['x-apikey'] || req.headers['x-api_key'],
+//         privateKey: req.headers['x-private-key'] || req.headers['x_private_key'] || req.headers['x-private_key'],
+//         rpcUrl: req.headers['x-rpc-url'] || req.headers['x_rpc_url'] || req.headers['x-rpc_url'] || CONFIG.DEFAULT_RPC_URL,
+//         gaslessApiKey: req.headers['x-gasless-api-key'] || req.headers['x_gasless_api_key'] || req.headers['x-gasless_api_key'] || req.headers['x-api-key'] || req.headers['x-apikey'] || req.headers['x-api_key'],
+//         chainId: Number(req.headers['x-chain-id'] || req.headers['x_chain_id '] || req.headers['x-chain_id']) || CONFIG.DEFAULT_CHAIN_ID,
+//         sxtApiKey: req.headers['x-sxt-api-key'] || req.headers['x_sxt_api_key'] || req.headers['x-sxt_api_key'],
+//         defaultSlippage: req.headers['x-default-slippage'] || req.headers['x-default_slippage'] || CONFIG.DEFAULT_SLIPPAGE,
+//         userAgent: req.headers['user-agent'] || 'bhindi-agent',
+//         timestamp: Date.now()
+//     };
+
+//     console.log('🔧 Configuration extracted:', {
+//         hasApiKey: !!config.apiKey,
+//         hasPrivateKey: !!config.privateKey,
+//         hasGaslessKey: !!config.gaslessApiKey,
+//         hasSxtKey: !!config.sxtApiKey,
+//         chainId: config.chainId,
+//         userAgent: config.userAgent
+//     });
+
+//     return config;
+// }
+
+// 🔧 Enhanced configuration extractor with double prefix support
 function extractConfig(req) {
     const config = {
-        apiKey: req.headers['x-api-key'] || req.headers['x-apikey'] || req.headers['x-api_key'],
-        privateKey: req.headers['x-private-key'] || req.headers['x-private_key'],
-        rpcUrl: req.headers['x-rpc-url'] || req.headers['x-rpc_url'] || CONFIG.DEFAULT_RPC_URL,
-        gaslessApiKey: req.headers['x-gasless-api-key'] || req.headers['x-gasless_api_key'] || req.headers['x-api-key'] || req.headers['x-apikey'] || req.headers['x-api_key'],
-        chainId: Number(req.headers['x-chain-id'] || req.headers['x-chain_id']) || CONFIG.DEFAULT_CHAIN_ID,
-        sxtApiKey: req.headers['x-sxt-api-key'] || req.headers['x-sxt_api_key'],
-        defaultSlippage: req.headers['x-default-slippage'] || req.headers['x-default_slippage'] || CONFIG.DEFAULT_SLIPPAGE,
+        // Handle both single and double prefixes from Bhindi
+        apiKey: req.headers['x-api-key'] || 
+                req.headers['x_api_key'] || 
+                req.headers['x-apikey'] || 
+                req.headers['x-x_api_key'] ||    // ✅ BHINDI DOUBLE PREFIX
+                req.headers['x-x-api-key'] ||    // ✅ BHINDI DOUBLE PREFIX
+                process.env.X_API_KEY ||
+                process.env.x_api_key,
+                
+        privateKey: req.headers['x-private-key'] || 
+                   req.headers['x_private_key'] || 
+                   req.headers['x-x_private_key'] ||  // ✅ BHINDI DOUBLE PREFIX
+                   req.headers['x-x-private-key'] ||  // ✅ BHINDI DOUBLE PREFIX
+                   process.env.X_PRIVATE_KEY ||
+                   process.env.x_private_key,
+                   
+        rpcUrl: req.headers['x-rpc-url'] || 
+               req.headers['x_rpc_url'] || 
+               req.headers['x-x_rpc_url'] ||      // ✅ BHINDI DOUBLE PREFIX
+               req.headers['x-x-rpc-url'] ||      // ✅ BHINDI DOUBLE PREFIX
+               process.env.X_RPC_URL ||
+               process.env.x_rpc_url ||
+               CONFIG.DEFAULT_RPC_URL,
+               
+        gaslessApiKey: req.headers['x-gasless-api-key'] || 
+                      req.headers['x_gasless_api_key'] || 
+                      req.headers['x-x_gasless_api_key'] ||  // ✅ BHINDI DOUBLE PREFIX
+                      req.headers['x-x-gasless-api-key'] ||  // ✅ BHINDI DOUBLE PREFIX
+                      req.headers['x-api-key'] || 
+                      req.headers['x-x_api_key'] ||          // ✅ FALLBACK DOUBLE PREFIX
+                      process.env.X_GASLESS_API_KEY ||
+                      process.env.x_gasless_api_key,
+                      
+        chainId: Number(req.headers['x-chain-id'] || 
+                       req.headers['x_chain_id'] || 
+                       req.headers['x-x_chain_id'] ||       // ✅ BHINDI DOUBLE PREFIX
+                       req.headers['x-x-chain-id'] ||       // ✅ BHINDI DOUBLE PREFIX
+                       process.env.X_CHAIN_ID ||
+                       process.env.x_chain_id) || CONFIG.DEFAULT_CHAIN_ID,
+                       
+        sxtApiKey: req.headers['x-sxt-api-key'] || 
+                  req.headers['x_sxt_api_key'] || 
+                  req.headers['x-x_sxt_api_key'] ||        // ✅ BHINDI DOUBLE PREFIX
+                  req.headers['x-x-sxt-api-key'] ||        // ✅ BHINDI DOUBLE PREFIX
+                  process.env.X_SXT_API_KEY ||
+                  process.env.x_sxt_api_key,
+                  
+        defaultSlippage: req.headers['x-default-slippage'] || 
+                        req.headers['x-default_slippage'] ||
+                        req.headers['x-x-default-slippage'] ||  // ✅ BHINDI DOUBLE PREFIX
+                        req.headers['x-x_default_slippage'] ||  // ✅ BHINDI DOUBLE PREFIX
+                        process.env.X_DEFAULT_SLIPPAGE ||
+                        process.env.x_default_slippage ||
+                        CONFIG.DEFAULT_SLIPPAGE,
+                        
         userAgent: req.headers['user-agent'] || 'bhindi-agent',
         timestamp: Date.now()
     };
 
-    console.log('🔧 Configuration extracted:', {
+    console.log('🔧 Configuration extracted (with double prefix support):', {
         hasApiKey: !!config.apiKey,
         hasPrivateKey: !!config.privateKey,
         hasGaslessKey: !!config.gaslessApiKey,
         hasSxtKey: !!config.sxtApiKey,
         chainId: config.chainId,
-        userAgent: config.userAgent
+        userAgent: config.userAgent,
+        source: {
+            apiKey: getHeaderSource(req, config.apiKey, 'api_key'),
+            privateKey: getHeaderSource(req, config.privateKey, 'private_key'),
+            gaslessKey: getHeaderSource(req, config.gaslessApiKey, 'gasless_api_key'),
+            sxtKey: getHeaderSource(req, config.sxtApiKey, 'sxt_api_key')
+        }
     });
 
     return config;
+}
+
+// Helper function to identify header source
+function getHeaderSource(req, value, keyType) {
+    if (!value) return 'missing';
+    
+    const singlePrefix = `x-${keyType.replace('_', '-')}`;
+    const doublePrefix = `x-x_${keyType}`;
+    const doublePrefixDash = `x-x-${keyType.replace('_', '-')}`;
+    
+    if (req.headers[singlePrefix] === value) return 'single-prefix';
+    if (req.headers[doublePrefix] === value) return 'double-prefix-underscore';
+    if (req.headers[doublePrefixDash] === value) return 'double-prefix-dash';
+    if (process.env[`X_${keyType.toUpperCase()}`] === value) return 'env-upper';
+    if (process.env[keyType] === value) return 'env-lower';
+    
+    return 'detected';
 }
 
 // Enhanced authentication middleware
